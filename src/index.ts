@@ -76,13 +76,28 @@ async function startStdioServer() {
  */
 async function main() {
   try {
+    // Configure once for all transports
+    await configureServer();
+
+    const activeTransports: string[] = [];
+
     if (config.enableSSE) {
       // Start the new SSE server with HTTP Streamable support
       await startSSEServer();
-    } else {
+      activeTransports.push('sse');
+    }
+
+    if (config.enableStdio) {
       // Start the traditional STDIO server
       await startStdioServer();
+      activeTransports.push('stdio');
     }
+
+    if (activeTransports.length === 0) {
+      throw new Error('No transports enabled. Set ENABLE_SSE and/or ENABLE_STDIO to true.');
+    }
+
+    info('MCP server transports active', { transports: activeTransports });
   } catch (err) {
     error('Error during server startup', {
       message: err.message,
