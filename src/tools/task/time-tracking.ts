@@ -173,6 +173,11 @@ export const addTimeEntryTool = {
 export const deleteTimeEntryTool = {
   name: "delete_time_entry",
   description: "Deletes a time entry. Required: time entry ID.",
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {
