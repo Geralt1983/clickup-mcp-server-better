@@ -1,15 +1,15 @@
 name: clickup-mcp-server-better
 runtime: container
 
-startCommand:
-  type: http
-  command: ["npm", "run", "start"]
-  env:
-    ENABLE_SSE: "true"
-    ENABLE_STDIO: "false"
-    PORT: "8081"
+  startCommand:
+    type: http
+    command: ["npm", "run", "start"]
+    env:
+      ENABLE_SSE: "true"
+      ENABLE_STDIO: "false"
+      PORT: "3231"
 
-installCommand: ["npm", "ci"]
-transport: streamable-http
-port: 8081
-path: /mcp
+  installCommand: ["npm", "ci"]
+  transport: streamable-http
+  port: 3231
+  path: /mcp

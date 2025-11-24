@@ -193,6 +193,12 @@ The server supports both modern **HTTP Streamable** transport (MCP Inspector com
 - **Primary**: `http://127.0.0.1:3231/mcp` (Streamable HTTP)
 - **Legacy**: `http://127.0.0.1:3231/sse` (SSE for backwards compatibility)
 
+### Deploying to smitheree.ai
+
+For the most stable smitheree.ai experience, use the streamable HTTP transport on the default MCP port (`3231`) with the `/mcp`
+path. The included `smithery.yaml` is preconfigured for smitheree.ai to run `npm run start` inside a container, expose port
+`3231`, and advertise the `/mcp` HTTP endpoint.
+
 ## Fork Differences
 
 This enhanced fork maintains 100% compatibility with the original while adding:
