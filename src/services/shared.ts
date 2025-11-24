@@ -16,6 +16,7 @@ const logger = new Logger('SharedServices');
 
 // Singleton instances
 let clickUpServicesInstance: ClickUpServices | null = null;
+let prewarmPromise: Promise<void> | null = null;
 
 /**
  * Get or create the ClickUp services instance
@@ -51,3 +52,26 @@ export const {
   timeTracking: timeTrackingService,
   document: documentService
 } = clickUpServices;
+
+/**
+ * Prewarm shared ClickUp service caches to reduce latency for the first
+ * MCP calls. This runs once per process and logs but never throws.
+ */
+export async function prewarmClickUpCaches(): Promise<void> {
+  if (prewarmPromise) {
+    return prewarmPromise;
+  }
+
+  prewarmPromise = (async () => {
+    logger.info('Starting background ClickUp cache prewarm');
+
+    await Promise.allSettled([
+      workspaceService.prewarmCaches(),
+      taskService.prewarmCaches?.()
+    ]);
+
+    logger.info('Completed ClickUp cache prewarm');
+  })();
+
+  return prewarmPromise;
+}

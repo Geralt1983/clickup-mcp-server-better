@@ -101,7 +101,7 @@ import {
 } from "./tools/member.js";
 
 import { Logger } from "./logger.js";
-import { clickUpServices } from "./services/shared.js";
+import { clickUpServices, prewarmClickUpCaches } from "./services/shared.js";
 
 // Create a logger instance for server
 const logger = new Logger('Server');
@@ -179,6 +179,11 @@ export function configureServer() {
 
   isServerConfigured = true;
   logger.info("Registering server request handlers");
+
+  // Kick off cache prewarm in the background to speed up initial MCP calls
+  prewarmClickUpCaches().catch((error) =>
+    logger.warn("Cache prewarm failed", { error: error instanceof Error ? error.message : String(error) })
+  );
 
   // Register ListTools handler
   server.setRequestHandler(ListToolsRequestSchema, async () => {
