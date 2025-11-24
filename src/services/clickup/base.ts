@@ -12,6 +12,8 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { Agent as HttpAgent } from 'node:http';
+import { Agent as HttpsAgent } from 'node:https';
 import { Logger, LogLevel } from '../../logger.js';
 
 /**
@@ -102,7 +104,20 @@ export class BaseClickUpService {
   protected readonly teamId: string;
   protected readonly client: AxiosInstance;
   protected readonly logger: Logger;
-  
+
+  private readonly keepAliveAgents = {
+    http: new HttpAgent({
+      keepAlive: true,
+      keepAliveMsecs: 15000,
+      maxSockets: 50
+    }),
+    https: new HttpsAgent({
+      keepAlive: true,
+      keepAliveMsecs: 15000,
+      maxSockets: 50
+    })
+  };
+
   protected readonly defaultRequestSpacing = 600; // Default milliseconds between requests
   protected readonly rateLimit = 100; // Maximum requests per minute (Free Forever plan)
   protected requestSpacing: number; // Current request spacing, can be adjusted
@@ -134,6 +149,8 @@ export class BaseClickUpService {
         'Content-Type': 'application/json'
       },
       timeout: this.timeout,
+      httpAgent: this.keepAliveAgents.http,
+      httpsAgent: this.keepAliveAgents.https,
       transformResponse: [
         // Add custom response transformer to handle both JSON and text responses
         (data: any) => {
@@ -284,15 +301,15 @@ export class BaseClickUpService {
         if (remaining < limit * 0.3) {
           // More aggressive spacing when close to limit
           let safeSpacing;
-          
+
           if (remaining <= 5) {
             // Very aggressive spacing for last few requests
             safeSpacing = Math.ceil((timeToReset / remaining) * 2);
             // Start processing in queue mode preemptively
             if (!this.processingQueue) {
-              this.logger.info('Preemptively switching to queue mode (low remaining requests)', { 
-                remaining, 
-                limit 
+              this.logger.info('Preemptively switching to queue mode (low remaining requests)', {
+                remaining,
+                limit
               });
               this.processingQueue = true;
               this.processQueue().catch(err => {
@@ -306,19 +323,26 @@ export class BaseClickUpService {
             // Standard safe spacing with buffer
             safeSpacing = Math.ceil((timeToReset / remaining) * 1.1);
           }
-          
+
           // Apply updated spacing, but with a reasonable maximum
           const maxSpacing = 5000; // 5 seconds max spacing
           const adjustedSpacing = Math.min(safeSpacing, maxSpacing);
-          
+
           // Only adjust if it's greater than our current spacing
           if (adjustedSpacing > this.requestSpacing) {
-            this.logger.debug(`Adjusting request spacing: ${this.requestSpacing}ms → ${adjustedSpacing}ms`, { 
-              remaining, 
-              timeToReset 
+            this.logger.debug(`Adjusting request spacing: ${this.requestSpacing}ms → ${adjustedSpacing}ms`, {
+              remaining,
+              timeToReset
             });
             this.requestSpacing = adjustedSpacing;
           }
+        } else if (remaining > limit * 0.7 && this.requestSpacing > this.defaultRequestSpacing) {
+          // If we have plenty of headroom, move back toward the default spacing
+          this.logger.debug(`Restoring faster request spacing: ${this.requestSpacing}ms → ${this.defaultRequestSpacing}ms`, {
+            remaining,
+            timeToReset
+          });
+          this.requestSpacing = this.defaultRequestSpacing;
         }
       }
     } catch (error) {
