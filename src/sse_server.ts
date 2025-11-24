@@ -122,10 +122,10 @@ export function startSSEServer() {
 
   const PORT = Number(configuration.port ?? '3231');
 
-  // Bind to localhost only for security
-  app.listen(PORT, () => {
-    console.log(`Server started on http://127.0.0.1:${PORT}`);
-    console.log(`Streamable HTTP endpoint: http://127.0.0.1:${PORT}/mcp`);
-    console.log(`Legacy SSE endpoint: http://127.0.0.1:${PORT}/sse`);
+  // Bind to all interfaces so hosted environments (e.g., Smithery) can reach the server
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server started on http://0.0.0.0:${PORT}`);
+    console.log(`Streamable HTTP endpoint: http://0.0.0.0:${PORT}/mcp`);
+    console.log(`Legacy SSE endpoint: http://0.0.0.0:${PORT}/sse`);
   });
 }

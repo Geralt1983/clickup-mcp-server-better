@@ -193,6 +193,16 @@ The server supports both modern **HTTP Streamable** transport (MCP Inspector com
 - **Primary**: `http://127.0.0.1:3231/mcp` (Streamable HTTP)
 - **Legacy**: `http://127.0.0.1:3231/sse` (SSE for backwards compatibility)
 
+## Hosting on Smithery
+
+This repository includes a `smithery.yaml` that runs the server with HTTP transport enabled for hosting on [smithery.ai](https://smithery.ai):
+
+- **Runtime:** `nodejs@22` (installs dependencies with `npm install`)
+- **Start command:** `npm start` with `ENABLE_SSE=true` so the HTTP/streamable transport is active
+- **Port & path:** Exposes port `8081` at the `/mcp` endpoint for MCP connections
+
+Ensure you provide `CLICKUP_API_KEY` and `CLICKUP_TEAM_ID` as secrets in Smithery before deploying.
+
 ## Fork Differences
 
 This enhanced fork maintains 100% compatibility with the original while adding:

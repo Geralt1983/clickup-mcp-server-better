@@ -1,9 +1,12 @@
 name: clickup-mcp-server-better
-runtime: container
-
+runtime: nodejs@22
+installCommand: npm install
 startCommand:
   type: http
-
+  command: npm start
+  env:
+    ENABLE_SSE: "true"
+    PORT: "8081"
 transport: streamable-http
 port: 8081
 path: /mcp
