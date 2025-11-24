@@ -15,13 +15,14 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import express from 'express';
 import { server, configureServer } from './server.js';
 import configuration from './config.js';
+import { info, error as logError } from './logger.js';
 
 const app = express();
 app.use(express.json());
 
-export function startSSEServer() {
-  // Configure the unified server first
-  configureServer();
+export async function startSSEServer() {
+  // Configure the unified server first (idempotent)
+  await configureServer();
 
   const transports = {
     streamable: {} as Record<string, StreamableHTTPServerTransport>,
@@ -65,7 +66,7 @@ export function startSSEServer() {
 
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
-      console.error('Error handling MCP request:', error);
+      logError('Error handling MCP request', error instanceof Error ? { message: error.message, stack: error.stack } : error);
       if (!res.headersSent) {
         res.status(500).json({
           jsonrpc: '2.0',
@@ -99,9 +100,7 @@ export function startSSEServer() {
     const transport = new SSEServerTransport('/messages', res);
     transports.sse[transport.sessionId] = transport;
 
-    console.log(
-      `New SSE connection established with sessionId: ${transport.sessionId}`
-    );
+    info('New SSE connection established', { sessionId: transport.sessionId });
 
     res.on('close', () => {
       delete transports.sse[transport.sessionId];
@@ -122,10 +121,17 @@ export function startSSEServer() {
 
   const PORT = Number(configuration.port ?? '3231');
 
-  // Bind to localhost only for security
-  app.listen(PORT, () => {
-    console.log(`Server started on http://127.0.0.1:${PORT}`);
-    console.log(`Streamable HTTP endpoint: http://127.0.0.1:${PORT}/mcp`);
-    console.log(`Legacy SSE endpoint: http://127.0.0.1:${PORT}/sse`);
+  // Bind to all interfaces so Smithery can reach the Streamable HTTP endpoint
+  app.listen(PORT, '0.0.0.0', () => {
+    info('Streamable HTTP transport listening', {
+      port: PORT,
+      endpoints: {
+        streamable: '/mcp',
+        sse: '/sse'
+      }
+    });
+  }).on('error', (err) => {
+    logError('Failed to start HTTP transport server', { message: err.message, stack: err.stack });
+    process.exit(1);
   });
 }

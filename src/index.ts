@@ -78,7 +78,7 @@ async function main() {
   try {
     if (config.enableSSE) {
       // Start the new SSE server with HTTP Streamable support
-      startSSEServer();
+      await startSSEServer();
     } else {
       // Start the traditional STDIO server
       await startStdioServer();
