@@ -268,6 +268,28 @@ export class WorkspaceService extends BaseClickUpService {
   }
 
   /**
+   * Warm up workspace-related caches in the background to speed up
+   * early MCP interactions for end users.
+   */
+  async prewarmCaches(): Promise<void> {
+    const start = Date.now();
+    logger.info('Prewarming workspace caches');
+
+    try {
+      await this.getWorkspaceHierarchy();
+
+      logger.info('Workspace caches prewarmed', {
+        durationMs: Date.now() - start
+      });
+    } catch (error) {
+      logger.warn('Workspace cache prewarm failed (continuing without cache)', {
+        durationMs: Date.now() - start,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  /**
    * Clear the stored workspace hierarchy, forcing a fresh fetch on next request
    */
   clearWorkspaceHierarchy(): void {
