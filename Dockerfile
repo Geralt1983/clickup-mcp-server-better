@@ -31,8 +31,13 @@ COPY --from=builder /app/node_modules ./node_modules
 # Copy the entrypoint script if necessary
 COPY --from=builder /app/package.json ./
 
-# Expose the desired port (if the server binds to a port)
-EXPOSE 8080
+# Expose the HTTP transport port used by Smithery
+EXPOSE 8081
+
+# Default to the streamable HTTP transport for hosted environments
+ENV PORT=8081 \
+    ENABLE_SSE=true \
+    ENABLE_STDIO=false
 
 # Define the command to run the application
-CMD ["node", "build/index.js"]
+CMD ["node", "build/index.js", "--env", "PORT=8081", "--env", "ENABLE_SSE=true", "--env", "ENABLE_STDIO=false"]

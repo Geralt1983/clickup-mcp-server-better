@@ -3,6 +3,7 @@ runtime: container
 
 startCommand:
   type: http
+  command: ["npm", "run", "start", "--", "--env", "ENABLE_SSE=true", "--env", "ENABLE_STDIO=false", "--env", "PORT=8081"]
 
 transport: streamable-http
 port: 8081
