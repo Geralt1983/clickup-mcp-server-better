@@ -172,9 +172,15 @@ export class ClickUpTagService extends BaseClickUpService {
   ): Promise<ServiceResponse<{ tagAdded: boolean }>> {
     try {
       this.logger.debug(`Adding tag "${tagName}" to task: ${taskId}`);
+
+      // Some workspaces experience slower responses for tag operations
+      // Give this path a more generous timeout to avoid premature failures
+      const tagOperationTimeout = Math.max(this.timeout, 90000);
       
       // First get the task to get its space ID
-      const taskResponse = await this.client.get<any>(`/task/${taskId}`);
+      const taskResponse = await this.client.get<any>(`/task/${taskId}`, {
+        timeout: tagOperationTimeout
+      });
       if (!taskResponse.data?.space?.id) {
         return {
           success: false,
@@ -216,10 +222,16 @@ export class ClickUpTagService extends BaseClickUpService {
       const encodedTagName = encodeURIComponent(tagName);
       
       // Add the tag
-      await this.client.post(`/task/${taskId}/tag/${encodedTagName}`, {});
+      await this.client.post(
+        `/task/${taskId}/tag/${encodedTagName}`,
+        {},
+        { timeout: tagOperationTimeout }
+      );
       
       // Verify the tag was added by getting the task again
-      const verifyResponse = await this.client.get<any>(`/task/${taskId}`);
+      const verifyResponse = await this.client.get<any>(`/task/${taskId}`, {
+        timeout: tagOperationTimeout
+      });
       const tagAdded = verifyResponse.data?.tags?.some(tag => tag.name === tagName) ?? false;
 
       if (!tagAdded) {
@@ -237,7 +249,18 @@ export class ClickUpTagService extends BaseClickUpService {
         data: { tagAdded: true }
       };
     } catch (error) {
-      this.logger.error(`Failed to add tag "${tagName}" to task: ${taskId}`, error);
+      // Capture raw response details to help diagnose ClickUp issues
+      const status = error?.response?.status ?? error?.data?.response?.status;
+      const responseData = error?.response?.data ?? error?.data?.response?.data ?? error?.data;
+
+      this.logger.error(
+        `Failed to add tag "${tagName}" to task: ${taskId}`,
+        {
+          error,
+          status,
+          responseData
+        }
+      );
       return {
         success: false,
         error: {
