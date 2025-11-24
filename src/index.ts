@@ -26,15 +26,9 @@
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { configureServer, server } from './server.js';
-import { clickUpServices } from './services/shared.js';
 import { info, error } from './logger.js';
 import config from './config.js';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { startSSEServer } from './sse_server.js';
-
-// Get directory name for module paths
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
@@ -49,26 +43,12 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 async function startStdioServer() {
-  info('Starting ClickUp MCP Server...');
-
-  // Log essential information about the environment
-  info('Server environment', {
-    pid: process.pid,
-    node: process.version,
-    os: process.platform,
-    arch: process.arch,
-  });
-
-  // Configure the server with all handlers
-  info('Configuring server request handlers');
-  await configureServer();
-
-  // Connect using stdio transport
+  // Connect using stdio transport (server assumed configured by caller)
   info('Connecting to MCP stdio transport');
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  info('Server startup complete - ready to handle requests');
+  info('STDIO transport ready to handle requests');
 }
 
 /**
@@ -76,7 +56,21 @@ async function startStdioServer() {
  */
 async function main() {
   try {
+    info('Starting ClickUp MCP server...');
+
+    info('Server environment', {
+      pid: process.pid,
+      node: process.version,
+      os: process.platform,
+      arch: process.arch,
+      transports: {
+        stdio: config.enableStdio,
+        sse: config.enableSSE,
+      },
+    });
+
     // Configure once for all transports
+    info('Configuring request handlers...');
     await configureServer();
 
     const activeTransports: string[] = [];
@@ -97,9 +91,9 @@ async function main() {
       throw new Error('No transports enabled. Set ENABLE_SSE and/or ENABLE_STDIO to true.');
     }
 
-    info('MCP server transports active', { transports: activeTransports });
+    info('Active transports:', { transports: activeTransports });
   } catch (err) {
-    error('Error during server startup', {
+    error('Server startup failed:', {
       message: err.message,
       stack: err.stack,
     });
