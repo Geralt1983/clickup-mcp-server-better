@@ -18,7 +18,7 @@ import configuration from './config.js';
 import { info, error as logError } from './logger.js';
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 export async function startSSEServer() {
   const transports = {
@@ -39,7 +39,8 @@ export async function startSSEServer() {
           sessionIdGenerator: () => `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
           onsessioninitialized: (sessionId) => {
             transports.streamable[sessionId] = transport;
-          }
+          },
+          enableJsonResponse: true,
         });
 
         transport.onclose = () => {
