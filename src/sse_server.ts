@@ -13,7 +13,7 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import express from 'express';
-import { server, configureServer } from './server.js';
+import { server } from './server.js';
 import configuration from './config.js';
 import { info, error as logError } from './logger.js';
 
@@ -21,9 +21,6 @@ const app = express();
 app.use(express.json());
 
 export async function startSSEServer() {
-  // Configure the unified server first (idempotent)
-  await configureServer();
-
   const transports = {
     streamable: {} as Record<string, StreamableHTTPServerTransport>,
     sse: {} as Record<string, SSEServerTransport>,
