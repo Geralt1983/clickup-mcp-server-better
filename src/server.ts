@@ -146,9 +146,17 @@ export const server = new Server(
   },
   {
     capabilities: {
-      tools: {},
-      prompts: {},
-      resources: {},
+      // Advertise tool/resource/prompt support so discovery tools don't miss capabilities
+      tools: {
+        listChanged: false,
+      },
+      prompts: {
+        listChanged: false,
+      },
+      resources: {
+        subscribe: false,
+        listChanged: false,
+      },
     },
   }
 );
