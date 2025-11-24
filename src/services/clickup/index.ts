@@ -27,6 +27,7 @@ export { FolderService } from './folder.js';
 export { ClickUpTagService } from './tag.js';
 export { TimeTrackingService } from './time.js';
 export { DocumentService } from './document.js';
+export { CustomRequestService } from './custom.js';
 
 // Import service classes for the factory function
 import { WorkspaceService } from './workspace.js';
@@ -37,6 +38,7 @@ import { ClickUpTagService } from './tag.js';
 import { TimeTrackingService } from './time.js';
 import { Logger } from '../../logger.js';
 import { DocumentService } from './document.js';
+import { CustomRequestService } from './custom.js';
 
 /**
  * Configuration options for ClickUp services
@@ -58,6 +60,7 @@ export interface ClickUpServices {
   tag: ClickUpTagService;
   timeTracking: TimeTrackingService;
   document: DocumentService;
+  custom: CustomRequestService;
 }
 
 // Singleton logger for ClickUp services
@@ -100,6 +103,9 @@ export function createClickUpServices(config: ClickUpServiceConfig): ClickUpServ
   logger.info('Initializing ClickUp Document service');
   const documentService = new DocumentService(apiKey, teamId, baseUrl);
 
+  logger.info('Initializing ClickUp Custom Request service');
+  const customService = new CustomRequestService(apiKey, teamId, baseUrl);
+
   const services = {
     workspace: workspaceService,
     task: taskService,
@@ -107,7 +113,8 @@ export function createClickUpServices(config: ClickUpServiceConfig): ClickUpServ
     folder: folderService,
     tag: tagService,
     timeTracking: timeTrackingService,
-    document: documentService
+    document: documentService,
+    custom: customService
   };
 
   // Log successful completion

@@ -99,6 +99,7 @@ import {
   findMemberByNameTool, handleFindMemberByName,
   resolveAssigneesTool, handleResolveAssignees
 } from "./tools/member.js";
+import { callClickUpApiTool, handleCallClickUpApi } from "./tools/custom-api.js";
 
 import { Logger } from "./logger.js";
 import { clickUpServices, prewarmClickUpCaches } from "./services/shared.js";
@@ -230,6 +231,7 @@ export function configureServer() {
         getWorkspaceMembersTool,
         findMemberByNameTool,
         resolveAssigneesTool,
+        callClickUpApiTool,
         ...documentModule()
       ].filter(tool => isToolEnabled(tool.name))
     };
@@ -243,8 +245,8 @@ export function configureServer() {
 
   // Register CallTool handler with proper logging
   logger.info("Registering tool handlers", {
-    toolCount: 36,
-    categories: ["workspace", "task", "time-tracking", "list", "folder", "tag", "member", "document"]
+    toolCount: 37,
+    categories: ["workspace", "task", "time-tracking", "list", "folder", "tag", "member", "document", "custom-api"]
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
@@ -364,6 +366,8 @@ export function configureServer() {
           return handleFindMemberByName(params);
         case "resolve_assignees":
           return handleResolveAssignees(params);
+        case "call_clickup_api":
+          return handleCallClickUpApi(params);
         default:
           logger.error(`Unknown tool requested: ${name}`);
           const error = new Error(`Unknown tool: ${name}`);

@@ -128,6 +128,12 @@ All original features plus improved parameter handling:
 - View workspace hierarchy
 - Efficient path navigation
 
+### 🧰 **Universal ClickUp API Access** (New!)
+- Call any ClickUp endpoint (dashboards, docs, custom fields, spaces, tags, lists, etc.)
+- Works with GET/POST/PUT/PATCH/DELETE
+- Pass raw query params, headers, and request bodies
+- Reuses shared auth, rate limiting, and error handling
+
 ### 👥 **Member Management**
 - Find workspace members by name or email
 - Resolve assignees for tasks
@@ -154,6 +160,7 @@ This fork includes all original tools plus new dependency management tools:
 | **Time Tracking** | 6 tools | Track time on tasks |
 | **Members** | 3 tools | Manage workspace members |
 | **Documents** | 6 tools | Manage ClickUp documents |
+| **Custom API** | 1 tool | Raw access to any ClickUp endpoint |
 
 [View complete API reference](docs/api-reference.md)
 
