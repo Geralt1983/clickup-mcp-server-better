@@ -12,6 +12,7 @@ import {
   GetPromptRequestSchema,
   ListResourcesRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { createClickUpServices } from "./services/clickup/index.js";
 import config from "./config.js";
 import { workspaceHierarchyTool, handleGetWorkspaceHierarchy } from "./tools/workspace.js";
@@ -139,10 +140,64 @@ const isToolEnabled = (toolName: string): boolean => {
   return true;
 };
 
+const formatTitleFromName = (name: string): string =>
+  name
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+
+const enhanceSchemaWithDescriptions = (schema: any, title: string) => {
+  if (!schema || typeof schema !== 'object') {
+    return schema;
+  }
+
+  const properties = schema.properties || {};
+  const enhancedProperties = Object.entries(properties).reduce<Record<string, any>>((acc, [key, value]) => {
+    if (value && typeof value === 'object' && !('description' in value)) {
+      acc[key] = {
+        description: `Value for ${key.replace(/_/g, ' ')}`,
+        ...value,
+      };
+    } else {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
+
+  return {
+    description: schema.description ?? `${title} parameters`,
+    ...schema,
+    properties: Object.keys(properties).length ? enhancedProperties : properties,
+  };
+};
+
+const enhanceToolMetadata = (tool: any): Tool => {
+  const toolTitle = tool.annotations?.title ?? formatTitleFromName(tool.name);
+  const isReadOnly = /^(get_|list_|find_|resolve_|call_clickup_api|get_workspace_hierarchy)/.test(tool.name);
+
+  const annotations = {
+    readOnlyHint: isReadOnly,
+    destructiveHint: !isReadOnly,
+    idempotentHint: isReadOnly,
+    openWorldHint: tool.name === 'call_clickup_api',
+    ...tool.annotations,
+    title: tool.annotations?.title ?? toolTitle,
+  };
+
+  return {
+    ...tool,
+    description: tool.description ?? `${toolTitle} tool`,
+    annotations,
+    inputSchema: enhanceSchemaWithDescriptions(tool.inputSchema as any, toolTitle),
+  };
+};
+
 export const server = new Server(
   {
     name: "clickup-mcp-server",
-    version: "0.8.2",
+    title: "ClickUp MCP Server (Enhanced)",
+    version: "0.8.4",
   },
   {
     capabilities: {
@@ -158,6 +213,10 @@ export const server = new Server(
         listChanged: false,
       },
     },
+    instructions:
+      "Manage ClickUp tasks, spaces, folders, lists, tags, time tracking, and documents. " +
+      "Set CLICKUP_API_KEY and CLICKUP_TEAM_ID in the environment. Most tools accept either IDs or names; " +
+      "read-only tools list or fetch data, while create/update/delete tools change workspace state.",
   }
 );
 
@@ -197,51 +256,55 @@ export function configureServer() {
   // Register ListTools handler
   server.setRequestHandler(ListToolsRequestSchema, async () => {
     logger.debug("Received ListTools request");
+    const tools = [
+      workspaceHierarchyTool,
+      createTaskTool,
+      getTaskTool,
+      updateTaskTool,
+      moveTaskTool,
+      duplicateTaskTool,
+      deleteTaskTool,
+      getTaskCommentsTool,
+      createTaskCommentTool,
+      attachTaskFileTool,
+      createBulkTasksTool,
+      updateBulkTasksTool,
+      moveBulkTasksTool,
+      deleteBulkTasksTool,
+      getWorkspaceTasksTool,
+      getTaskTimeEntriesTool,
+      startTimeTrackingTool,
+      stopTimeTrackingTool,
+      addTimeEntryTool,
+      deleteTimeEntryTool,
+      getCurrentTimeEntryTool,
+      addTaskDependencyTool,
+      removeTaskDependencyTool,
+      getTaskDependenciesTool,
+      addBulkDependenciesTool,
+      createListTool,
+      createListInFolderTool,
+      getListTool,
+      updateListTool,
+      deleteListTool,
+      createFolderTool,
+      getFolderTool,
+      updateFolderTool,
+      deleteFolderTool,
+      getSpaceTagsTool,
+      addTagToTaskTool,
+      removeTagFromTaskTool,
+      getWorkspaceMembersTool,
+      findMemberByNameTool,
+      resolveAssigneesTool,
+      callClickUpApiTool,
+      ...documentModule(),
+    ];
+
     return {
-      tools: [
-        workspaceHierarchyTool,
-        createTaskTool,
-        getTaskTool,
-        updateTaskTool,
-        moveTaskTool,
-        duplicateTaskTool,
-        deleteTaskTool,
-        getTaskCommentsTool,
-        createTaskCommentTool,
-        attachTaskFileTool,
-        createBulkTasksTool,
-        updateBulkTasksTool,
-        moveBulkTasksTool,
-        deleteBulkTasksTool,
-        getWorkspaceTasksTool,
-        getTaskTimeEntriesTool,
-        startTimeTrackingTool,
-        stopTimeTrackingTool,
-        addTimeEntryTool,
-        deleteTimeEntryTool,
-        getCurrentTimeEntryTool,
-        addTaskDependencyTool,
-        removeTaskDependencyTool,
-        getTaskDependenciesTool,
-        addBulkDependenciesTool,
-        createListTool,
-        createListInFolderTool,
-        getListTool,
-        updateListTool,
-        deleteListTool,
-        createFolderTool,
-        getFolderTool,
-        updateFolderTool,
-        deleteFolderTool,
-        getSpaceTagsTool,
-        addTagToTaskTool,
-        removeTagFromTaskTool,
-        getWorkspaceMembersTool,
-        findMemberByNameTool,
-        resolveAssigneesTool,
-        callClickUpApiTool,
-        ...documentModule()
-      ].filter(tool => isToolEnabled(tool.name))
+      tools: tools
+        .filter((tool) => isToolEnabled(tool.name))
+        .map((tool) => enhanceToolMetadata(tool))
     };
   });
 
