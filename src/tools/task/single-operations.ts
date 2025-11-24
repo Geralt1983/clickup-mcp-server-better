@@ -499,6 +499,11 @@ export const createTaskCommentTool = {
 export const deleteTaskTool = {
   name: "delete_task",
   description: `PERMANENTLY deletes task. Use taskId (preferred/safest) or taskName + optional listName. WARNING: Cannot be undone. Using taskName without listName may match multiple tasks.`,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {

@@ -175,6 +175,11 @@ Requirements:
 Warning:
 - This will remove the tag from all tasks in the space
 - This action cannot be undone`,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {

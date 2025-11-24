@@ -167,6 +167,11 @@ export const updateListTool = {
 export const deleteListTool = {
   name: "delete_list",
   description: `PERMANENTLY deletes a ClickUp list and all its tasks. Use listId (preferred/safest) or listName. WARNING: Cannot be undone, all tasks will be deleted, listName risky if not unique.`,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {

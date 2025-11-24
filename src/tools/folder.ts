@@ -123,6 +123,11 @@ export const updateFolderTool = {
 export const deleteFolderTool = {
   name: "delete_folder",
   description: `PERMANENTLY deletes folder and all contents. Use folderId (preferred/safest) or folderName + (spaceId/spaceName). WARNING: Cannot be undone, all lists/tasks deleted, folderName risky if not unique.`,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {

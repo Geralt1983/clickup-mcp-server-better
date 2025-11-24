@@ -325,6 +325,11 @@ export const moveBulkTasksTool = {
 export const deleteBulkTasksTool = {
   name: "delete_bulk_tasks",
   description: `PERMANENTLY deletes multiple tasks. For each task: use taskId (preferred/safest) or taskName + listName. Configure batch size/concurrency via options. WARNING: Cannot be undone, taskName without listName is dangerous.`,
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+  },
   inputSchema: {
     type: "object",
     properties: {
