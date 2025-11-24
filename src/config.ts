@@ -96,6 +96,9 @@ const parseInteger = (value: string | undefined, defaultValue: number): number =
 };
 
 // Load configuration from command line args or environment variables
+const defaultPort = envArgs.port || process.env.PORT;
+const enableSSEDefault = defaultPort !== undefined;
+
 const configuration: Config = {
   clickupApiKey: envArgs.clickupApiKey || process.env.CLICKUP_API_KEY || '',
   clickupTeamId: envArgs.clickupTeamId || process.env.CLICKUP_TEAM_ID || '',
@@ -108,10 +111,10 @@ const configuration: Config = {
   enabledTools: (
     (envArgs.enabledTools || process.env.ENABLED_TOOLS)?.split(',').map(cmd => cmd.trim()).filter(cmd => cmd !== '') || []
   ),
-  enableSSE: parseBoolean(envArgs.enableSSE || process.env.ENABLE_SSE, false),
+  enableSSE: parseBoolean(envArgs.enableSSE || process.env.ENABLE_SSE, enableSSEDefault),
   ssePort: parseInteger(envArgs.ssePort || process.env.SSE_PORT, 3000),
   enableStdio: parseBoolean(envArgs.enableStdio || process.env.ENABLE_STDIO, true),
-  port: envArgs.port || process.env.PORT || '3231',
+  port: defaultPort || '3231',
 };
 
 // Don't log to console as it interferes with JSON-RPC communication

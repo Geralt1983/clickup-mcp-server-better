@@ -5,5 +5,5 @@ startCommand:
   type: http
 
 transport: streamable-http
-port: 8081
+port: 3231
 path: /mcp

@@ -165,7 +165,7 @@ This fork includes all original tools plus new dependency management tools:
 | `CLICKUP_TEAM_ID` | Your ClickUp team ID | Required |
 | `DOCUMENT_SUPPORT` | Enable document management | `false` |
 | `DISABLED_TOOLS` | Comma-separated list of tools to disable | None |
-| `ENABLE_SSE` | Enable HTTP/SSE transport | `false` |
+| `ENABLE_SSE` | Enable HTTP/SSE transport | `false` (auto-enabled when `PORT` is set) |
 | `PORT` | Port for HTTP server | `3231` |
 
 ## HTTP Transport Support
