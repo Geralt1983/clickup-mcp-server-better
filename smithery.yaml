@@ -1,27 +1,9 @@
-# smithery.yaml
 name: clickup-mcp-server-better
 runtime: container
 
 startCommand:
   type: http
-  command: node
-  args:
-    - build/http.js
-  cwd: .
 
 transport: streamable-http
 port: 8081
-endpoint: /mcp
-
-configSchema:
-  type: object
-  properties:
-    CLICKUP_API_KEY:
-      type: string
-      description: "ClickUp API key"
-    CLICKUP_TEAM_ID:
-      type: string
-      description: "ClickUp workspace or team id"
-  required:
-    - CLICKUP_API_KEY
-    - CLICKUP_TEAM_ID
+path: /mcp
