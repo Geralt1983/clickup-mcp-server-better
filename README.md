@@ -2,6 +2,7 @@
 
 <img src="assets/images/clickup_mcp_server_social_image.png" alt="ClickUp MCP Server" width="100%">
 
+[![smithery badge](https://smithery.ai/badge/@Geralt1983/clickup-mcp-server-better)](https://smithery.ai/server/@Geralt1983/clickup-mcp-server-better)
 [![NPM Version](https://img.shields.io/npm/v/@djclarkson/clickup-mcp-server.svg?style=flat&logo=npm)](https://www.npmjs.com/package/@djclarkson/clickup-mcp-server)
 [![GitHub Stars](https://img.shields.io/github/stars/djclarkson/clickup-mcp-server?style=flat&logo=github)](https://github.com/djclarkson/clickup-mcp-server/stargazers)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-brightgreen.svg)](https://github.com/djclarkson/clickup-mcp-server/graphs/commit-activity)
