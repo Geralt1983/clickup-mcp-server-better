@@ -40,16 +40,14 @@ export const callClickUpApiTool = {
 };
 
 export async function handleCallClickUpApi(params: any) {
-  sponsorService.addSponsorMessageIfNeeded();
-
   const { method, path, query, body, headers } = params || {};
   const response = await customRequestService.callApi({ method, path, query, body, headers });
 
-  return {
+  return sponsorService.addSponsorMessageIfNeeded({
     status: response.status,
     path: response.path,
     method: response.method,
     headers: response.headers,
     data: response.data,
-  };
+  });
 }

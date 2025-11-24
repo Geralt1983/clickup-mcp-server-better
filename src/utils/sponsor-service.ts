@@ -24,6 +24,20 @@ export class SponsorService {
     this.isEnabled = config.enableSponsorMessage;
     logger.info('SponsorService initialized', { enabled: this.isEnabled });
   }
+
+  /**
+   * Adds a sponsor message to a response object when enabled
+   */
+  public addSponsorMessageIfNeeded<T extends Record<string, any>>(response: T): T & { sponsorMessage?: string } {
+    if (!this.isEnabled) {
+      return response;
+    }
+
+    return {
+      ...response,
+      sponsorMessage: `Support this project at ${this.sponsorUrl}`
+    };
+  }
   
   /**
    * Get sponsor information (for documentation/reference purposes)
@@ -102,4 +116,4 @@ export class SponsorService {
 }
 
 // Export a singleton instance
-export const sponsorService = new SponsorService(); 
+export const sponsorService = new SponsorService();
