@@ -9,6 +9,7 @@ This document provides detailed information about all available tools, their par
 - [Folder Management](#folder-management)
 - [Tag Management](#tag-management)
 - [Time Tracking](#time-tracking)
+- [Universal API Passthrough](#universal-api-passthrough)
 - [Document Management](#document-management)
 - [Workspace Organization](#workspace-organization)
 - [Prompts](#prompts)
@@ -1002,6 +1003,19 @@ Add the "feature" tag to the task "Implement Authentication"
    ```
 
 5. **Supported Color Names**: Basic colors (red, blue, green, etc.) and common variations (dark blue, light green, etc.) are supported.
+
+## Universal API Passthrough
+
+Use this tool to reach any ClickUp API endpoint directly (dashboards, docs, spaces, tags, custom fields, etc.) without waiting for a dedicated handler.
+
+| Tool | Description | Required Parameters | Optional Parameters |
+|------|-------------|---------------------|---------------------|
+| call_clickup_api | Raw ClickUp API request | `method`, `path` | `query`, `body`, `headers` |
+
+**Usage notes:**
+- `path` should be relative to `/api/v2`, e.g. `/team/{teamId}/dashboard`, `/space`, `/task/{taskId}`.
+- Supports `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` while reusing the server's authentication and rate-limit handling.
+- Provide `query` as an object for URL parameters and `body` as an object for JSON payloads.
 
 ## Document Management
 

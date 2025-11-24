@@ -50,7 +50,8 @@ export const {
   folder: folderService,
   workspace: workspaceService,
   timeTracking: timeTrackingService,
-  document: documentService
+  document: documentService,
+  custom: customRequestService
 } = clickUpServices;
 
 /**
