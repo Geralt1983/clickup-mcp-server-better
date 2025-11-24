@@ -106,6 +106,9 @@ import { clickUpServices } from "./services/shared.js";
 // Create a logger instance for server
 const logger = new Logger('Server');
 
+// Track whether the server has already been configured to avoid double registration
+let isServerConfigured = false;
+
 // Use existing services from shared module instead of creating new ones
 const { workspace } = clickUpServices;
 
@@ -169,6 +172,12 @@ const documentModule = () => {
  * Configure the server routes and handlers
  */
 export function configureServer() {
+  if (isServerConfigured) {
+    logger.debug("Server already configured - skipping duplicate handler registration");
+    return server;
+  }
+
+  isServerConfigured = true;
   logger.info("Registering server request handlers");
 
   // Register ListTools handler
